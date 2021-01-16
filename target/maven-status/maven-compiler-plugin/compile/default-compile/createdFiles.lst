@@ -1,3 +1,4 @@
-com/shahs/tradeload/tradeload/repository/TradeRepository.class
 com/shahs/tradeload/tradeload/TradeloadApplication.class
 com/shahs/tradeload/tradeload/model/Trade.class
+com/shahs/tradeload/tradeload/repository/TradeRepository.class
+com/shahs/tradeload/tradeload/service/HelloMessageService.class

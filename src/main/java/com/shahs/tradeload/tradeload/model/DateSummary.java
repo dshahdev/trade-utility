@@ -2,27 +2,29 @@ package com.shahs.tradeload.tradeload.model;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.Date;
+
 @Entity
 @Table(name="date_summary")
-@SequenceGenerator(name="seq", initialValue=9, allocationSize=10)
+@SequenceGenerator(name="dsseq", initialValue=9, allocationSize=10)
 public class DateSummary {
 
     private long id;
-    private String s_date;
+    private Date s_date;
     private String s_ticker;
     private double profit_loss;
 
     public DateSummary() {
     }
 
-    public DateSummary(String date, String ticker, double profit_loss) {
+    public DateSummary(Date date, String ticker, double profit_loss) {
         this.s_date = date;
         this.s_ticker = ticker;
         this.profit_loss = profit_loss;
     }
 
     @Id
-    @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="seq")
+    @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="dsseq")
     public long getId() {
         return id;
     }
@@ -31,10 +33,10 @@ public class DateSummary {
     }
 
     @Column(name="s_date", nullable = false)
-    public String getSummaryDate() {
+    public Date getSummaryDate() {
         return this.s_date;
     }
-    public void setSummaryDate(String date) {
+    public void setSummaryDate(Date date) {
         this.s_date = date;
     }
 

@@ -1,14 +1,20 @@
 package com.shahs.tradeload.tradeload.model;
 
 import javax.persistence.*;
+
+import com.shahs.tradeload.tradeload.util.MiscUtils;
 import org.hibernate.annotations.Columns;
 
-    @Entity
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+@Entity
     @Table(name="trade")
     @SequenceGenerator(name="seq", initialValue=9, allocationSize=10)
     public class Trade {
         private long id;
-        private String date;
+        private Date date;
         private String action;
         private String ticker;
         private int quantity;
@@ -18,7 +24,7 @@ import org.hibernate.annotations.Columns;
 
         public Trade() {}
 
-        public Trade(String date, String action, String ticker, int qty, double price, double amount, double fees) {
+        public Trade(Date date, String action, String ticker, int qty, double price, double amount, double fees) {
             this.date = date;
             this.action = action;
             this.ticker = ticker;
@@ -38,10 +44,10 @@ import org.hibernate.annotations.Columns;
         }
 
         @Column(name="date", nullable = false)
-        public String getDate() {
+        public Date getDate() {
             return this.date;
         }
-        public void setDate(String date) {
+        public void setDate(Date date) {
             this.date = date;
         }
 
@@ -118,17 +124,23 @@ import org.hibernate.annotations.Columns;
 
             Trade newTrade = new Trade();
 
-            newTrade.setDate(csvFile[0]);
+            Date cDate = MiscUtils.stringToDate(csvFile[0],"MM/dd/yyyy");
+            newTrade.setDate(cDate);
             newTrade.setAction(csvFile[1]);
             newTrade.setTicker(csvFile[2]);
             newTrade.setQuantity(Integer.parseInt(csvFile[4]));
             newTrade.setPrice(Double.parseDouble(csvFile[5]));
             newTrade.setFees(Double.parseDouble(csvFile[6].equals( "" ) ? "0.0": csvFile[6]));
             newTrade.setAmount(Double.parseDouble(csvFile[7]));
-            System.out.println("newtrade: "+newTrade);
+//            System.out.println("newtrade: "+newTrade);
             return newTrade;
 
         }
+        public Trade[] sortTrades(Trade trade) {
+
+           return null;
+        }
+
     }
 
 
