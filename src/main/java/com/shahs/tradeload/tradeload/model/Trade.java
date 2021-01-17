@@ -141,7 +141,15 @@ import java.util.Date;
            return null;
         }
 
+    public void addSameLotTrade(Trade current) {
+        this.quantity += current.getQuantity();
+        this.amount += current.getAmount();
+        this.fees += current.getFees();
+        if (this.quantity != 0) {
+            this.price = Math.abs(this.amount) / Math.abs(this.quantity);
+        }
     }
+}
 
 
 

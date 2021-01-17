@@ -1,5 +1,9 @@
 package com.shahs.tradeload.tradeload.util;
 
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -17,27 +21,13 @@ public class MiscUtils {
     }
 
     public static java.util.Date stringToDate(String date, String format) {    // format example "MM/dd/yyyy"
-
-        SimpleDateFormat sdf = new SimpleDateFormat(format);
-        java.sql.Date sqlDate = null;
-        try {
-            java.util.Date utilDate = sdf.parse(date);
-            sqlDate = new java.sql.Date(utilDate.getTime());
-
-        } catch(ParseException e) {
-            e.printStackTrace();
-        }
-        return sqlDate;
+        DateTimeFormatter formatter = DateTimeFormat.forPattern(format);
+        DateTime dt = formatter.parseDateTime(date);
+        return dt.toDate();
     }
     public static String dateToString(Date date, String format) {
-
-        SimpleDateFormat sdf = new SimpleDateFormat(format);
-        String stringDate = "";
-        try {
-            stringDate = sdf.format(date);
-        }catch(Exception e) {
-            e.printStackTrace();
-        }
-        return stringDate;
+        DateTime dt = new DateTime(date);
+        DateTimeFormatter fmt = DateTimeFormat.forPattern(format);
+        return fmt.print(dt);
     }
 }

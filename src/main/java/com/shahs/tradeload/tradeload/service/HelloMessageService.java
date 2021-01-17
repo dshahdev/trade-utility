@@ -19,6 +19,7 @@ public class HelloMessageService {
     public static final String DATE_FORMAT_MDY= "MM/dd/yyyy";
     public static final String DATE_FORMAT_YMD= "yyyy/MM/dd";
     public static final String DATE_FORMAT_YMD_NO_SLASH = "yyyyMMdd";
+    public static final String DATE_FORMAT_YMD_W_DASH = "yyyy-MM-dd";
 
     String line = "";
     String splitBy=",";
@@ -91,6 +92,8 @@ public class HelloMessageService {
     }
     public void printCsvFile(String inputPath, String csvFile) throws IOException{
         java.util.Date runDate = MiscUtils.stringToDate(csvFile.substring(10,18), DATE_FORMAT_YMD_NO_SLASH);
+        String dashDate = csvFile.substring(10,14) +  "-" + csvFile.substring(14,16) + "-" + csvFile.substring(16,18);
+//        java.util.Date dashDate = MiscUtils.stringToDate(csvFile.substring(10,18), DATE_FORMAT_YMD_W_DASH);
         System.out.println(csvFile.substring(10,18));
         // load parameters so we have parameter last date
         LoadParameters();
@@ -105,7 +108,7 @@ public class HelloMessageService {
         loadTrades(inputPath + csvFile);
 //        loadTrades(csvFile);
 
-        generateAlloc(runDate);
+        generateAlloc(dashDate);
 
         // save the date that was just run
         sysParams.setLastDateStr(MiscUtils.dateToString(runDate,DATE_FORMAT_MDY));
@@ -113,7 +116,7 @@ public class HelloMessageService {
         SaveParameters();
 
     }
-    public void generateAlloc(java.util.Date runDate) {
+    public void generateAlloc(String dashDate) {
         // generate alloc data
         List<Alloc> allocList = new ArrayList<Alloc>();
 
@@ -123,7 +126,7 @@ public class HelloMessageService {
 
         // load sell trades for today's date
 
-        List<Trade> tradeList = tradeRepository.findSellTradesForDate(runDate);
+        List<Trade> tradeList = tradeRepository.findSellTradesForDate(dashDate);
         tradeList.forEach(td -> {
             System.out.println("sell entry: "+ td);
             //this sell needs to be allocated
@@ -185,6 +188,10 @@ public class HelloMessageService {
         String something = br.readLine();
         System.out.println(line + " " + something);
         String line1 = "";
+        Trade prior = null;
+        boolean priorPending = false;
+        Trade current = null;
+
         while((line1 = br.readLine()) != null) {
 
             String[] arr = line1.replace("\"","")
@@ -195,12 +202,26 @@ public class HelloMessageService {
             }
             System.out.println("Line1: "+ line1);
 
-            Trade trade = Trade.createTradeObj(arr);
-            System.out.println("final trades: "+trade.toString());
+            current = Trade.createTradeObj(arr);
+            if (prior == null) { prior = current; continue; }
 
+            if (canMerge(current, prior)) {
+                prior = mergeTrades(current, prior);
+                current = null;
+                priorPending = true;
+                continue;
+            }
 
-            tradeRepository.save(trade);
+            System.out.println("final trade: "+prior.toString());
+            tradeRepository.save(prior);
+            prior = current;
+        }
 
+        if (priorPending) {
+            tradeRepository.save(prior);
+        }
+        if (current != null) {
+            tradeRepository.save(current);
         }
 
         // so now we have hashmap with key-- date+ticker, value pnlVal
@@ -215,6 +236,21 @@ public class HelloMessageService {
 //            dateSummaryRepository.save(ds);
 //        }
 
+       }
+
+       public boolean canMerge(Trade current, Trade prior) {
+        if (current.getDate().equals(prior.getDate()) &&
+                current.getTicker().equals(prior.getTicker()) &&
+                current.getAction().equals(prior.getAction()) &&
+                Math.abs(current.getPrice() - prior.getPrice()) <= 0.25) {
+            return true;
+        }
+        return false;
+       }
+
+       public Trade mergeTrades(Trade current, Trade prior) {
+            prior.addSameLotTrade(current);
+            return prior;
        }
 
 
